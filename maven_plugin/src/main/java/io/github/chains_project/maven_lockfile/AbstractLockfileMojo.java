@@ -43,7 +43,7 @@ public abstract class AbstractLockfileMojo extends AbstractMojo {
     @Component
     protected RepositorySystem repositorySystem;
 
-    @Parameter(property = "includeMavenPlugins", defaultValue = "false")
+    @Parameter(property = "includeMavenPlugins", defaultValue = "true")
     protected String includeMavenPlugins;
 
     @Parameter(property = "allowValidationFailure", defaultValue = "false")
