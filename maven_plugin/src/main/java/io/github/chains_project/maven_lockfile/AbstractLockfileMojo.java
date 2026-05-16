@@ -43,19 +43,19 @@ public abstract class AbstractLockfileMojo extends AbstractMojo {
     @Component
     protected RepositorySystem repositorySystem;
 
-    @Parameter(property = "includeMavenPlugins", defaultValue = "false")
+    @Parameter(property = "includeMavenPlugins")
     protected String includeMavenPlugins;
 
-    @Parameter(property = "allowValidationFailure", defaultValue = "false")
+    @Parameter(property = "allowValidationFailure")
     protected String allowValidationFailure;
 
-    @Parameter(property = "allowPomValidationFailure", defaultValue = "false")
+    @Parameter(property = "allowPomValidationFailure")
     protected String allowPomValidationFailure;
 
-    @Parameter(property = "allowEnvironmentalValidationFailure", defaultValue = "false")
+    @Parameter(property = "allowEnvironmentalValidationFailure")
     protected String allowEnvironmentalValidationFailure;
 
-    @Parameter(property = "includeEnvironment", defaultValue = "true")
+    @Parameter(property = "includeEnvironment")
     protected String includeEnvironment;
 
     @Parameter(defaultValue = "${maven.version}")
@@ -150,9 +150,11 @@ public abstract class AbstractLockfileMojo extends AbstractMojo {
                 Boolean.parseBoolean(allowEnvironmentalValidationFailure)
                         ? Config.OnEnvironmentalValidationFailure.Warn
                         : Config.OnEnvironmentalValidationFailure.Error;
-        Config.EnvironmentInclusion environmentInclusion = Boolean.parseBoolean(includeEnvironment)
-                ? Config.EnvironmentInclusion.Include
-                : Config.EnvironmentInclusion.Exclude;
+        // null means "not set" — default for includeEnvironment is Include (true), not Exclude
+        Config.EnvironmentInclusion environmentInclusion =
+                Strings.isNullOrEmpty(includeEnvironment) || Boolean.parseBoolean(includeEnvironment)
+                        ? Config.EnvironmentInclusion.Include
+                        : Config.EnvironmentInclusion.Exclude;
         Config.ReductionState reductionState =
                 Boolean.parseBoolean(reduced) ? Config.ReductionState.Reduced : Config.ReductionState.NonReduced;
 
@@ -178,5 +180,50 @@ public abstract class AbstractLockfileMojo extends AbstractMojo {
         ProjectBuildingRequest buildingRequest = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
         buildingRequest.setRemoteRepositories(project.getPluginArtifactRepositories());
         return buildingRequest;
+    }
+
+    /**
+     * Returns a Config that starts from {@code base} (typically the stored lockfile config) and overrides
+     * only the fields for which a CLI argument was explicitly provided (non-null / non-empty).
+     * Fields that were not supplied on the command line keep their stored value, ensuring backward
+     * compatibility when new arguments are added after a lockfile was generated.
+     */
+    protected Config mergeConfigWithCliArgs(Config base) {
+        Config.MavenPluginsInclusion pluginsInclusion = Strings.isNullOrEmpty(includeMavenPlugins)
+                ? base.getMavenPluginsInclusion()
+                : (Boolean.parseBoolean(includeMavenPlugins)
+                        ? Config.MavenPluginsInclusion.Include
+                        : Config.MavenPluginsInclusion.Exclude);
+        Config.OnValidationFailure onValidationFailure = Strings.isNullOrEmpty(allowValidationFailure)
+                ? base.getOnValidationFailure()
+                : (Boolean.parseBoolean(allowValidationFailure)
+                        ? Config.OnValidationFailure.Warn
+                        : Config.OnValidationFailure.Error);
+        Config.OnPomValidationFailure onPomValidationFailure = Strings.isNullOrEmpty(allowPomValidationFailure)
+                ? base.getOnPomValidationFailure()
+                : (Boolean.parseBoolean(allowPomValidationFailure)
+                        ? Config.OnPomValidationFailure.Warn
+                        : Config.OnPomValidationFailure.Error);
+        Config.OnEnvironmentalValidationFailure onEnvFailure =
+                Strings.isNullOrEmpty(allowEnvironmentalValidationFailure)
+                        ? base.getOnEnvironmentalValidationFailure()
+                        : (Boolean.parseBoolean(allowEnvironmentalValidationFailure)
+                                ? Config.OnEnvironmentalValidationFailure.Warn
+                                : Config.OnEnvironmentalValidationFailure.Error);
+        Config.EnvironmentInclusion environmentInclusion = Strings.isNullOrEmpty(includeEnvironment)
+                ? base.getEnvironmentInclusion()
+                : (Boolean.parseBoolean(includeEnvironment)
+                        ? Config.EnvironmentInclusion.Include
+                        : Config.EnvironmentInclusion.Exclude);
+        return new Config(
+                pluginsInclusion,
+                onValidationFailure,
+                onPomValidationFailure,
+                onEnvFailure,
+                environmentInclusion,
+                base.getReductionState(),
+                base.getMavenLockfileVersion(),
+                base.getChecksumMode(),
+                base.getChecksumAlgorithm());
     }
 }
