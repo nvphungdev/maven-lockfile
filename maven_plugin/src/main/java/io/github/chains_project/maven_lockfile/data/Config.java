@@ -196,9 +196,7 @@ public class Config {
     }
 
     public OnParentPomValidationFailure getOnParentPomValidationFailure() {
-        return allowParentPomValidationFailure
-                ? OnParentPomValidationFailure.Warn
-                : OnParentPomValidationFailure.Error;
+        return allowParentPomValidationFailure ? OnParentPomValidationFailure.Warn : OnParentPomValidationFailure.Error;
     }
 
     public boolean isIncludeMavenExtensions() {

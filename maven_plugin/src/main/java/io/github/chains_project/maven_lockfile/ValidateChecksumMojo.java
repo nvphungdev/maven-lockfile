@@ -238,8 +238,7 @@ public class ValidateChecksumMojo extends AbstractLockfileMojo {
                             && Objects.equals(pA.getVersion(), pB.getVersion()))
                     .findFirst();
             if (!pBOpt.isPresent()) return false;
-            if (!nodeBomsEqual(pA.getDependencies(), pBOpt.get().getDependencies(), compareParentChains))
-                return false;
+            if (!nodeBomsEqual(pA.getDependencies(), pBOpt.get().getDependencies(), compareParentChains)) return false;
         }
         return true;
     }
@@ -247,12 +246,12 @@ public class ValidateChecksumMojo extends AbstractLockfileMojo {
     private static boolean nodeBomsEqual(
             Set<DependencyNode> depsA, Set<DependencyNode> depsB, boolean compareParentChains) {
         if (depsA.size() != depsB.size()) return false;
-        return depsA.stream().allMatch(nA -> depsB.stream().anyMatch(nB ->
-                Objects.equals(nA.getGroupId(), nB.getGroupId())
-                && Objects.equals(nA.getArtifactId(), nB.getArtifactId())
-                && Objects.equals(nA.getVersion(), nB.getVersion())
-                && pomSetsEqual(nA.getBoms(), nB.getBoms(), compareParentChains)
-                && nodeBomsEqual(nA.getChildren(), nB.getChildren(), compareParentChains)));
+        return depsA.stream().allMatch(nA -> depsB.stream()
+                .anyMatch(nB -> Objects.equals(nA.getGroupId(), nB.getGroupId())
+                        && Objects.equals(nA.getArtifactId(), nB.getArtifactId())
+                        && Objects.equals(nA.getVersion(), nB.getVersion())
+                        && pomSetsEqual(nA.getBoms(), nB.getBoms(), compareParentChains)
+                        && nodeBomsEqual(nA.getChildren(), nB.getChildren(), compareParentChains)));
     }
 
     private static boolean pomSetsEqual(Set<Pom> a, Set<Pom> b, boolean compareParentChains) {
@@ -297,11 +296,11 @@ public class ValidateChecksumMojo extends AbstractLockfileMojo {
 
     private static boolean nodeParentPomsEqual(Set<DependencyNode> depsA, Set<DependencyNode> depsB) {
         if (depsA.size() != depsB.size()) return false;
-        return depsA.stream().allMatch(nA -> depsB.stream().anyMatch(nB ->
-                Objects.equals(nA.getGroupId(), nB.getGroupId())
-                && Objects.equals(nA.getArtifactId(), nB.getArtifactId())
-                && Objects.equals(nA.getVersion(), nB.getVersion())
-                && Objects.equals(nA.getParentPom(), nB.getParentPom())
-                && nodeParentPomsEqual(nA.getChildren(), nB.getChildren())));
+        return depsA.stream().allMatch(nA -> depsB.stream()
+                .anyMatch(nB -> Objects.equals(nA.getGroupId(), nB.getGroupId())
+                        && Objects.equals(nA.getArtifactId(), nB.getArtifactId())
+                        && Objects.equals(nA.getVersion(), nB.getVersion())
+                        && Objects.equals(nA.getParentPom(), nB.getParentPom())
+                        && nodeParentPomsEqual(nA.getChildren(), nB.getChildren())));
     }
 }

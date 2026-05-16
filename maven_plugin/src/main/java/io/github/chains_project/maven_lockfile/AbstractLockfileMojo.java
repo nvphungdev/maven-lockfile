@@ -176,10 +176,9 @@ public abstract class AbstractLockfileMojo extends AbstractMojo {
         Config.ReductionState reductionState =
                 Boolean.parseBoolean(reduced) ? Config.ReductionState.Reduced : Config.ReductionState.NonReduced;
         // include* flags default to Include when unset — same pattern as includeEnvironment
-        Config.BomsInclusion bomsInclusion =
-                Strings.isNullOrEmpty(includeBoms) || Boolean.parseBoolean(includeBoms)
-                        ? Config.BomsInclusion.Include
-                        : Config.BomsInclusion.Exclude;
+        Config.BomsInclusion bomsInclusion = Strings.isNullOrEmpty(includeBoms) || Boolean.parseBoolean(includeBoms)
+                ? Config.BomsInclusion.Include
+                : Config.BomsInclusion.Exclude;
         Config.OnBomValidationFailure onBomValidationFailure = Boolean.parseBoolean(allowBomValidationFailure)
                 ? Config.OnBomValidationFailure.Warn
                 : Config.OnBomValidationFailure.Error;
